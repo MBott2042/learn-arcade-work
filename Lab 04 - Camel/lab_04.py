@@ -66,8 +66,6 @@ def main():
             natives_distance = natives_distance + random.randrange(7, 14)
             print("The natives are " + str(miles_traveled - natives_distance) + " miles behind you.\n")
 
-
-
         elif user_choice == 'D':
             print(" \nYou have stopped for the night to rest.")
             camel_tiredness = camel_tiredness - camel_tiredness
@@ -118,5 +116,6 @@ def main():
             print(" Wow you found a oasis you can drink from it and refill you canteen.")
         elif oasis_chance < 20:
             oasis_chance = 0
+
 
 main()
