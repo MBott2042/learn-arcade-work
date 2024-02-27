@@ -1,5 +1,4 @@
-print("""You can print
-on multiple
-lines using
-triple
-quotes.""")
+x = 10
+y = 5
+y *= x
+print(y)
