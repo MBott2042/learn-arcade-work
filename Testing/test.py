@@ -1,94 +1,93 @@
+import arcade
 
-"""Class def for room"""
+SCREEN_WIDTH = 640
+SCREEN_HEIGHT = 480
+MOVEMENT_SPEED = 3
+laser_sound = arcade.load_sound("laser.wav")
 
+class Ball:
+    def __init__(self, position_x, position_y, change_x, change_y, radius, color):
 
-class Room:
+        # Take the parameters of the init function above,
+        # and create instance variables out of them.
+        self.position_x = position_x
+        self.position_y = position_y
+        self.change_x = change_x
+        self.change_y = change_y
+        self.radius = radius
+        self.color = color
 
-    def __init__(self, description, north, east, south, west):
-        self.description = description
-        self.north = north
-        self.east = east
-        self.south = south
-        self.west = west
+    def draw(self):
+        arcade.draw_circle_filled(self.position_x,
+                                  self.position_y,
+                                  self.radius, self.
+                                  color)
 
+    def update(self):
+        # Move the ball
+        self.position_y += self.change_y
+        self.position_x += self.change_x
 
-"""Standard code"""
+        # See if the ball hit the edge of the screen. If so, change direction
+        if self.position_x < self.radius:
+            self.position_x = self.radius
+            arcade.play_sound(laser_sound)
+        if self.position_x > SCREEN_WIDTH - self.radius:
+            self.position_x = SCREEN_WIDTH - self.radius
+            arcade.play_sound(laser_sound)
+        if self.position_y < self.radius:
+            self.position_y = self.radius
+            arcade.play_sound(laser_sound)
+        if self.position_y > SCREEN_HEIGHT - self.radius:
+            self.position_y = SCREEN_HEIGHT - self.radius
+            arcade.play_sound(laser_sound)
+
+class MyGame(arcade.Window):
+
+    def __init__(self, width, height, title):
+
+        # Call the parent class's init function
+        super().__init__(width, height, title)
+
+        # Make the mouse disappear when it is over the window.
+        # So we just see our object, not the pointer.
+        self.set_mouse_visible(False)
+
+        arcade.set_background_color(arcade.color.ASH_GREY)
+
+        # Create our ball
+        self.ball = Ball(50, 50, 0, 0, 15, arcade.color.AUBURN)
+
+    def on_draw(self):
+        """ Called whenever we need to draw the window. """
+        arcade.start_render()
+        self.ball.draw()
+
+    def update(self, delta_time):
+        self.ball.update()
+
+    def on_key_press(self, key, modifiers):
+        """ Called whenever the user presses a key. """
+        if key == arcade.key.LEFT:
+            self.ball.change_x = -MOVEMENT_SPEED
+        elif key == arcade.key.RIGHT:
+            self.ball.change_x = MOVEMENT_SPEED
+        elif key == arcade.key.UP:
+            self.ball.change_y = MOVEMENT_SPEED
+        elif key == arcade.key.DOWN:
+            self.ball.change_y = -MOVEMENT_SPEED
+
+    def on_key_release(self, key, modifiers):
+        """ Called whenever a user releases a key. """
+        if key == arcade.key.LEFT or key == arcade.key.RIGHT:
+            self.ball.change_x = 0
+        elif key == arcade.key.UP or key == arcade.key.DOWN:
+            self.ball.change_y = 0
 
 
 def main():
-    room_list = []
-    current_room = 0
-    next_room = 0
-    done = False
-
-    # Rooms 0-7 (des,N,E,S,W)
-    room = Room("\nYou are in the bathroom, there is a door to the East\n", None, 1, None, None)
-    room_list.append(room)
-
-    room = Room("\nYou are in the mud room, there is a door to the East, West, and North\n", 4, 2, None, 0)
-    room_list.append(room)
-
-    room = Room("\nYou are in the Study, there is a door to the West\n", None, None, None, 1)
-    room_list.append(room)
-
-    room = Room("\nYou are in the Master Bedroom, there is a door to the East\n", None, 4, None, None)
-    room_list.append(room)
-
-    room = Room("\nYou are in the main hallway, there is a door to the East, West, North and south\n", 6, 5, 1, 3)
-    room_list.append(room)
-
-    room = Room("\nYou are in the kitchen, there is a door to the West\n", None, None, None, 4)
-    room_list.append(room)
-
-    room = Room("""\nYou are standing on the Balcony,
-there is a door to the South and a Long fall if you go North\n""", 7, None, 4, None)
-    room_list.append(room)
-
-    room = Room("""\nWow your not very smart 
-I think you broke some bones anyway head south to get back inside \n""", None, None, 6, None)
-    room_list.append(room)
-
-# creating a way to move around and what happens when an incorrect input is put in
-
-    while not done:
-        print(room_list[current_room].description)
-        direction = input("""Where to Boss? (n s e w) or press (q) to jump off the roof. """).lower()
-        if direction[0] == 'n':
-            next_room = room_list[current_room].north
-            if next_room == None:
-                print("\nThat's a WALL Genius!")
-                continue
-            current_room = next_room
-
-        elif direction[0] == 's':
-            next_room = room_list[current_room].south
-            if next_room == None:
-                print("\nThat's a WALL Genius!")
-                continue
-            current_room = next_room
-
-        elif direction[0] == 'e':
-            next_room = room_list[current_room].east
-            if next_room == None:
-                print("\nThat's a WALL Genius!")
-                continue
-            current_room = next_room
-
-        elif direction[0] == 'w':
-            next_room = room_list[current_room].west
-            if next_room == None:
-                print("\nThat's a WALL Genius!")
-                continue
-            current_room = next_room
-
-        elif direction[0] == 'q':
-            done = True
-            print("\nyou took the easy way out")
-
-        else:
-            print("""what is wrong with you you have five options
-             and what ever you just put down is not one of them are you stupid.""")
-            continue
+    window = MyGame(640, 480, "Drawing Example")
+    arcade.run()
 
 
 main()
