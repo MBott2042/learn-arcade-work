@@ -43,8 +43,10 @@ class MyGame(arcade.Window):
         """
         super().__init__(width, height, title, resizable=True)
 
+
         self.all_sprites_list = None
         self.coin_list = None
+
 
         # Sprite lists
         self.player_list = None
@@ -79,23 +81,23 @@ class MyGame(arcade.Window):
 
         self.score = 0
 
+
         # Set up the player
-        self.player_sprite = arcade.Sprite(":resources:images/animated_characters/male_adventurer"
-                                           "/maleAdventurer_idle.png",
+        self.player_sprite = arcade.Sprite(":resources:images/animated_characters/male_adventurer/maleAdventurer_idle.png",
                                            scale=0.4)
         self.player_sprite.center_x = 256
         self.player_sprite.center_y = 512
         self.player_list.append(self.player_sprite)
 
-        # the walls
+        #the walls
         # Place boxes inside a loop
-        for x in range(0, 1700, 64):
+        for x in range(0,1700, 64):
             wall = arcade.Sprite(":resources:images/tiles/stoneCenter.png",)
             wall.center_x = x
             wall.center_y = -100
             self.wall_list.append(wall)
         # --- Place walls with a list
-        for y in range(0, 1700, 64):
+        for y in range(0,1700, 64):
             wall = arcade.Sprite(":resources:images/tiles/stoneCenter.png",)
             wall.center_x = -100
             wall.center_y = y
@@ -159,11 +161,11 @@ class MyGame(arcade.Window):
                 wall.center_y = y
                 self.wall_list.append(wall)
         for x in range(900, 1200, 432):
-            for y in range(200, 1450, 64):
-                wall = arcade.Sprite(":resources:images/tiles/lava.png", SPRITE_SCALING)
-                wall.center_x = x
-                wall.center_y = y
-                self.wall_list.append(wall)
+                for y in range(200, 1450, 64):
+                    wall = arcade.Sprite(":resources:images/tiles/lava.png", SPRITE_SCALING)
+                    wall.center_x = x
+                    wall.center_y = y
+                    self.wall_list.append(wall)
         for i in range(NUMBER_OF_COINS):
             coin = arcade.Sprite(":resources:images/items/star.png", )
             coin_placed_successfully = False
@@ -206,7 +208,9 @@ class MyGame(arcade.Window):
         self.player_list.draw()
         self.coin_list.draw()
 
-        # Select the (scrolled) camera for our GUI
+
+
+        # Select the (unscrolled) camera for our GUI
         self.camera_gui.use()
 
         # Draw the GUI
@@ -320,12 +324,12 @@ class MyGame(arcade.Window):
         self.camera_gui.resize(int(width), int(height))
 
 
+
 def main():
     """ Main function """
     window = MyGame(DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_HEIGHT, SCREEN_TITLE)
     window.setup()
     arcade.run()
-
 
 if __name__ == "__main__":
     main()

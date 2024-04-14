@@ -1,171 +1,187 @@
-import random
-import arcade
+"""
+No coins on the walls
 
-# --- Constants ---
-SPRITE_SCALING_PLAYER = 0.5
-SPRITE_SCALING_COIN = .25
-SPRITE_SCALING_METEOR = .25
-COIN_COUNT = 50
-METEOR_COUNT = 50
+Simple program to show basic sprite usage. Specifically, create coin sprites that
+aren't on top of any walls, and don't have coins on top of each other.
+
+Artwork from https://kenney.nl
+
+If Python and Arcade are installed, this example can be run from the command line with:
+python -m arcade.examples.sprite_no_coins_on_walls
+"""
+import arcade
+import random
+import os
+
+SPRITE_SCALING = 0.5
+SPRITE_SCALING_COIN = 0.2
 
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 600
-SCREEN_TITLE = "Sprite Collect Coins Example"
-good_sound = arcade.load_sound("good.wav")
-bad_sound = arcade.load_sound("bad.wav")
+SCREEN_TITLE = "Sprite No Coins on Walls Example"
 
+NUMBER_OF_COINS = 50
 
-class Coin(arcade.Sprite, ):
-    def update(self):
-
-        self.center_y -= 1
-
-        # See if the coin has fallen off the bottom of the screen.
-        # If so, reset it.
-        if self.top < 0:
-            # Reset the coin to a random spot above the screen
-            self.center_y = random.randrange(SCREEN_HEIGHT + 20,
-                                             SCREEN_HEIGHT + 100)
-            self.center_x = random.randrange(SCREEN_WIDTH)
-
-
-class Meteor(arcade.Sprite):
-    def update(self):
-        # Move the meteor
-        self.center_y -= 1
-        self.center_x -= 1
-        # See if the meteor has fallen off the bottom of the screen.
-        # If so, reset it.
-        if self.top < 0:
-            # Reset the meteor to a random spot above the screen
-            self.center_y = random.randrange(SCREEN_HEIGHT + 20)
-            self.center_x = random.randrange(SCREEN_WIDTH)
+MOVEMENT_SPEED = 5
 
 
 class MyGame(arcade.Window):
-    """ Our custom Window Class"""
+    """ Main application class. """
 
-    def __init__(self):
-        """ Initializer """
-        # Call the parent class initializer
-        super().__init__(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE)
+    def __init__(self, width, height, title):
+        """
+        Initializer
+        """
+        super().__init__(width, height, title)
 
-        # Variables that will hold sprite lists
-        self.player_list = None
+        # Set the working directory (where we expect to find files) to the same
+        # directory this .py file is in. You can leave this out of your own
+        # code, but it is needed to easily run the examples using "python -m"
+        # as mentioned at the top of this program.
+        file_path = os.path.dirname(os.path.abspath(__file__))
+        os.chdir(file_path)
+
+        # Sprite lists
+        self.all_sprites_list = None
         self.coin_list = None
-        self.meteor_list = None
 
-        # Set up the player info
+        # Set up the player
         self.player_sprite = None
-        self.score = 0
-
-        # Don't show the mouse cursor
-        self.set_mouse_visible(False)
-
-        arcade.set_background_color((15, 0, 20))
+        self.wall_list = None
+        self.physics_engine = None
 
     def setup(self):
         """ Set up the game and initialize the variables. """
 
         # Sprite lists
-        self.player_list = arcade.SpriteList()
+        self.all_sprites_list = arcade.SpriteList()
+        self.wall_list = arcade.SpriteList()
         self.coin_list = arcade.SpriteList()
-        self.meteor_list = arcade.SpriteList()
-
-        # Score
-        self.score = 0
 
         # Set up the player
-        # Character image from kenney.nl
-        img = ":resources:images/space_shooter/playerShip1_orange.png"
-        self.player_sprite = arcade.Sprite(img, SPRITE_SCALING_PLAYER)
+        self.player_sprite = arcade.Sprite(":resources:images/animated_characters/female_person/femalePerson_idle.png",
+                                           SPRITE_SCALING)
         self.player_sprite.center_x = 50
-        self.player_sprite.center_y = 50
-        self.player_list.append(self.player_sprite)
+        self.player_sprite.center_y = 64
 
+        # -- Set up the walls
+        # Create a series of horizontal walls
+        for y in range(0, 800, 200):
+            for x in range(100, 700, 64):
+                wall = arcade.Sprite(":resources:images/tiles/boxCrate_double.png", SPRITE_SCALING)
+                wall.center_x = x
+                wall.center_y = y
+                self.wall_list.append(wall)
+
+        # -- Randomly place coins where there are no walls
         # Create the coins
-        for i in range(COIN_COUNT):
+        for i in range(NUMBER_OF_COINS):
+
             # Create the coin instance
             # Coin image from kenney.nl
-            coin = Coin(":resources:images/items/star.png",
-                        SPRITE_SCALING_COIN)
+            coin = arcade.Sprite(":resources:images/items/coinGold.png", SPRITE_SCALING_COIN)
 
-            # Position the coin
-            coin.center_x = random.randrange(SCREEN_WIDTH)
-            coin.center_y = random.randrange(SCREEN_HEIGHT)
+
+
+            # --- IMPORTANT PART ---
+
+
+
+            # Boolean variable if we successfully placed the coin
+
+            coin_placed_successfully = False
+
+
+
+            # Keep trying until success
+
+            while not coin_placed_successfully:
+
+                # Position the coin
+
+                coin.center_x = random.randrange(SCREEN_WIDTH)
+
+                coin.center_y = random.randrange(SCREEN_HEIGHT)
+
+
+
+                # See if the coin is hitting a wall
+
+                wall_hit_list = arcade.check_for_collision_with_list(coin, self.wall_list)
+
+
+
+                # See if the coin is hitting another coin
+
+                coin_hit_list = arcade.check_for_collision_with_list(coin, self.coin_list)
+
+
+
+                if len(wall_hit_list) == 0 and len(coin_hit_list) == 0:
+
+                    # It is!
+
+                    coin_placed_successfully = True
+
+
 
             # Add the coin to the lists
+
             self.coin_list.append(coin)
 
-        for i in range(METEOR_COUNT):
-            # Create the meteor instance
-            # Coin image from kenney.nl
-            meteor = Meteor(":resources:images/space_shooter/meteorGrey_big3.png", SPRITE_SCALING_METEOR)
 
-            # Position the meteor
-            meteor.center_x = random.randrange(SCREEN_WIDTH)
-            meteor.center_y = random.randrange(SCREEN_HEIGHT)
 
-            # Add the meteor to the lists
-            self.meteor_list.append(meteor)
+            # --- END OF IMPORTANT PART ---
+
+        self.physics_engine = arcade.PhysicsEngineSimple(self.player_sprite, self.wall_list)
+
+        # Set the background color
+        arcade.set_background_color(arcade.color.AMAZON)
 
     def on_draw(self):
-        """ Draw everything """
+        """
+        Render the screen.
+        """
+
+        # This command has to happen before we start drawing
         self.clear()
-        self.meteor_list.draw()
+
+        # Draw all the sprites.
+        self.wall_list.draw()
         self.coin_list.draw()
-        self.player_list.draw()
+        self.player_sprite.draw()
 
-        # Put the text on the screen.
-        output = f"Score: {self.score}"
-        arcade.draw_text(text=output, start_x=10, start_y=20,
-                         color=arcade.color.WHITE, font_size=14)
+    def on_key_press(self, key, modifiers):
+        """Called whenever a key is pressed. """
 
-        if len(self.coin_list) == 0:
-            arcade.draw_text("GAME", 0, 300, arcade.color.ROSE, 200)
-            arcade.draw_text("OVER", 0, 50, arcade.color.ROSE, 200)
+        if key == arcade.key.UP:
+            self.player_sprite.change_y = MOVEMENT_SPEED
+        elif key == arcade.key.DOWN:
+            self.player_sprite.change_y = -MOVEMENT_SPEED
+        elif key == arcade.key.LEFT:
+            self.player_sprite.change_x = -MOVEMENT_SPEED
+        elif key == arcade.key.RIGHT:
+            self.player_sprite.change_x = MOVEMENT_SPEED
 
-    def on_mouse_motion(self, x, y, dx, dy):
-        """ Handle Mouse Motion """
+    def on_key_release(self, key, modifiers):
+        """Called when the user releases a key. """
 
-        # Move the center of the player sprite to match the mouse x, y
-        if len(self.coin_list) != 0:
-            self.player_sprite.center_x = x
-            self.player_sprite.center_y = y
+        if key == arcade.key.UP or key == arcade.key.DOWN:
+            self.player_sprite.change_y = 0
+        elif key == arcade.key.LEFT or key == arcade.key.RIGHT:
+            self.player_sprite.change_x = 0
 
     def on_update(self, delta_time):
         """ Movement and game logic """
 
-        if len(self.coin_list) != 0:
-            self.coin_list.update()
-            # Generate a list of all sprites that collided with the player.
-        coins_hit_list = arcade.check_for_collision_with_list(self.player_sprite,
-                                                              self.coin_list)
-        if len(self.coin_list) != 0:
-            # Loop through each colliding sprite, remove it, and add to the score.
-            for coin in coins_hit_list:
-                coin.remove_from_sprite_lists()
-                self.score += 1
-                arcade.play_sound(good_sound)
-
-        meteor_hit_list = arcade.check_for_collision_with_list(self.player_sprite, self.meteor_list)
-        if len(self.coin_list) != 0:
-            self.meteor_list.update()
-        # Loop through each colliding sprite, remove it, and add to the score.
-        for meteor in meteor_hit_list:
-            meteor.remove_from_sprite_lists()
-            self.score += -1
-            arcade.play_sound(bad_sound)
-        if len(self.coin_list) == 0:
-            for meteor in meteor_hit_list:
-                meteor.remove_from_sprite_lists()
-                self.score += -1
-                arcade.play_sound(bad_sound)
+        # Call update on all sprites (The sprites don't do much in this
+        # example though.)
+        self.physics_engine.update()
 
 
 def main():
     """ Main function """
-    window = MyGame()
+    window = MyGame(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE)
     window.setup()
     arcade.run()
 
