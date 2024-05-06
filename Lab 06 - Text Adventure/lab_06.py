@@ -41,7 +41,7 @@ def main():
     room_list.append(room)
 
     room = Room("""\nYou are standing on the Balcony,
-there is a door to the South and a Long fall if you go North\n""", 7, None, 4, None)
+there is a door to the South and a Long fall if you go North press j to jump to the north \n""", None, None, 4, None)
     room_list.append(room)
 
     room = Room("""\nWow your not very smart 
@@ -84,6 +84,10 @@ I think you broke some bones anyway head south to get back inside \n""", None, N
         elif direction[0] == 'q':
             done = True
             print("\nyou took the easy way out")
+
+        elif direction[0] == 'j':
+            done = True
+            print("\n why did you jump there was no way for you to survive that ")
 
         else:
             print("""what is wrong with you you have five options
